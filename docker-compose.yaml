@@ -1,0 +1,135 @@
+# Oldar BAKR 030119118
+version: '3'
+
+
+
+services:
+
+  drupal:
+
+    image: bitnami/drupal:latest
+
+    ports:
+
+      - 80:80
+
+    environment:
+
+      - MARIADB_HOST=db
+
+      - MARIADB_PORT_NUMBER=3306
+
+      - ALLOW_EMPTY_PASSWORD=yes
+
+      - DRUPAL_DATABASE_USER=${USER}
+
+      - DRUPAL_DATABASE_PASSWORD=${PASSWORD}
+
+      - DRUPAL_DATABASE_NAME=${DATABASE}
+
+    depends_on:
+
+      - db
+
+    volumes:
+
+      - drupal_data:/bitnami/drupal
+
+
+
+  db:
+
+    image: bitnami/mariadb:latest
+
+    environment:
+
+      - MARIADB_USER=${USER}
+
+      - MARIADB_PASSWORD=${PASSWORD}
+
+      - MARIADB_DATABASE=${DATABASE}
+
+    volumes:
+
+      - db_data:/bitnami/mariadb
+
+
+
+  webserver:
+
+    image: nginx
+
+    ports:
+
+      - 80:80
+
+    volumes:
+
+      - drupal_data:/usr/share/nginx/html
+
+
+
+  certbot:
+
+    image: certbot
+
+    volumes:
+
+      - drupal_data:/usr/share/nginx/html
+
+    command: certonly --webroot --webroot-path=/usr/share/nginx/html --email oldar@prebitit.com --agree-tos --no-eff-email -d prebitit.com -d www.prebitit.com
+
+
+
+volumes:
+
+  drupal_data:
+
+  db_data:
+
+
+
+Docker Compose dosyasında "db" servisine ait çevre değişkenlerini aşağıdaki şekilde ayarlar yapımı:
+
+
+# Oldar BAKR 030119118
+
+services:
+
+  db:
+
+    image: bitnami/mariadb:latest
+
+    environment:
+
+      - MARIADB_USER=YAM428
+
+      - MARIADB_PASSWORD=030119118
+
+      - MARIADB_DATABASE=final
+
+    volumes:
+
+      - db_data:/bitnami/mariadb
+
+
+
+Docker Compose dosyasında "webserver" servisine ait "ports" bölümünü aşağıdaki gibi ayarlandı sunucunun 80 numaralı portundan web hizmeti vermesini sağladım:
+
+# Oldar BAKR 030119118
+services:
+  webserver:
+    image: nginx
+    ports:
+      - 80:80
+    volumes:
+      - drupal_data:/usr/share/nginx/html
+
+Docker Compose dosyasında "certbot" servisini aşağıdaki gibi ekleyerek web sunucunuzun SSL hizmeti (443 portundan) vermesini sağlayın:
+
+services:
+  certbot:
+    image: certbot
+    volumes:
+      - drupal_data:/usr/share/nginx/html
+    command: certonly --webroot --webroot-path=/usr/share/nginx/html --email oldar@prebitit.com --agree-tos --no-eff-email -d prebitit.com -d www.prebitit.com
